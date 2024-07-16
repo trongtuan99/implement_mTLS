@@ -2,14 +2,14 @@ Implement mTLS for internal microservices
 
 1. Generate required files: Generate the Root CA certificate:
 
-   ```
-   Note:
-   -days 365: expiration period
-    1y: 365
-    2y: 730
-    5y: 1825
-    10y: 3650
-   ```
+```
+  Note:
+  -days 365: expiration period
+  1y: 365
+  2y: 730
+  5y: 1825
+  10y: 3650
+```
 
 - create `ca.cnf`: Creating the Certificate Authority's Certificate and Keys
 
@@ -39,8 +39,7 @@ Implement mTLS for internal microservices
 
 - NEXT STEP
 
-```
-
+```ruby
   # Use this command to create a password-protected, 4096-bit private key
 
   openssl genrsa -aes256 -passout pass:password -out ca.pass.key 4096
@@ -83,7 +82,7 @@ Implement mTLS for internal microservices
 
 - NEXT STEP
 
-```
+```ruby
   openssl genrsa -aes256 -passout pass:password -out server.pass.key 4096
 
   openssl rsa -passin pass:password -in server.pass.key -out server.key
@@ -120,7 +119,7 @@ Implement mTLS for internal microservices
 
 - NEXT STEP
 
-```
+```ruby
   openssl genrsa -aes256 -passout pass:password -out client.pass.key 4096
 
   openssl rsa -passin pass:password -in client.pass.key -out client.key
@@ -172,13 +171,19 @@ or with curl for a better handshake debugging log:
 curl --key certs/client.key --cert certs/client.crt --cacert certs/ca.crt  https://localhost:3001/hook/test --header "X-API-VERSION: v1" -v
 ```
 
-```
+```ruby
 # check date:
-openssl x509 -noout -text -in server.crt | grep -i -A2 validity
+  openssl x509 -noout -text -in certs/server.crt | grep -i -A2 validity
 
 # check content
-openssl x509 -noout -text -in server.crt
-openssl req -noout -text -in server.csr
+  openssl x509 -in certs/ca.crt -noout -text
+  openssl rsa -in certs/ca.key -check
+  openssl x509 -noout -text -in certs/server.crt
+  openssl req -noout -text -in certs/server.csr
+
+#verify cer with ca
+  openssl verify -CAfile certs/ca.crt certs/server.crt
+  openssl verify -CAfile certs/ca.crt certs/client.crt
 ```
 
 Some error mess:
